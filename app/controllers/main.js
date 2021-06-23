@@ -21,7 +21,14 @@ function getData() {
 
 getData();
 
-function getInputs(isAdd) {
+function displayError(status) {
+  var error = document.getElementsByClassName("alert alert-danger");
+  for (var i = 0; i < error.length; i++) {
+    error[i].style.display = status;
+  }
+}
+
+function getInputs(isAdd, id) {
   var _taiKhoan = getEle("TaiKhoan").value;
   var _hoTen = getEle("HoTen").value;
   var _matKhau = getEle("MatKhau").value;
@@ -126,7 +133,7 @@ function getInputs(isAdd) {
 
   if (isValid) {
     var nguoiDung = new NguoiDung(
-      "",
+      id,
       _taiKhoan,
       _hoTen,
       _matKhau,
@@ -169,7 +176,10 @@ function renderListUser(list) {
 }
 
 // render modal thêm người dùng
-getEle("btnThemNguoiDung").addEventListener("click", function () {
+getEle("btnThemNguoiDung").addEventListener("click", function (event) {
+  //chặn web bị load lại
+  event.preventDefault();
+
   // document.getElementsByClassName("modal-body")[0].clear();
   document.getElementsByClassName("modal-title")[0].innerHTML =
     "Thêm Người Dùng";
@@ -177,6 +187,8 @@ getEle("btnThemNguoiDung").addEventListener("click", function () {
   var footer =
     '<button class="btn btn-primary" id="btnAdd" onclick="addUser()">Thêm Người Dùng</button>';
   document.getElementsByClassName("modal-footer")[0].innerHTML = footer;
+  // document.getElementById("bodyForm").reset();
+  document.getElementsByClassName("modal-body")[0].reset();
 });
 
 /**
@@ -187,7 +199,7 @@ function addUser() {
   /**
    * DOM lấy valuer tù inputs
    */
-  var nguoiDung = getInputs(true);
+  var nguoiDung = getInputs(true, "");
 
   if (nguoiDung) {
     service
@@ -258,37 +270,23 @@ function suaNguoiDung(id) {
  * Cập nhật người dùng
  */
 function capNhatNguoiDung(id) {
-  var taiKhoan = getEle("TaiKhoan").value;
-  var hoTen = getEle("HoTen").value;
-  var matKhau = getEle("MatKhau").value;
-  var email = getEle("Email").value;
-  var hinhAnh = getEle("HinhAnh").value;
-  var loaiND = getEle("loaiNguoiDung").value;
-  var ngonNgu = getEle("loaiNgonNgu").value;
-  var moTa = getEle("MoTa").value;
+  var nguoiDung = getInputs(false, id);
 
-  var nguoiDung = new NguoiDung(
-    id,
-    taiKhoan,
-    hoTen,
-    matKhau,
-    email,
-    ngonNgu,
-    loaiND,
-    hinhAnh,
-    moTa
-  );
-
-  service
-    .updateUserApi(nguoiDung)
-    .then(function () {
-      alert("Cập nhật thành công !");
-      // Tắt modal
-      document.getElementsByClassName("close")[0].click();
-      // Làm mới trang
-      getData();
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+  if (nguoiDung) {
+    service
+      .updateUserApi(nguoiDung)
+      .then(function () {
+        alert("Cập nhật thành công !");
+        // Tắt modal
+        document.getElementsByClassName("close")[0].click();
+        // Làm mới trang
+        getData();
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  } else {
+    // alert("Cập nhật thất bại !");
+    console.log("Cập nhật thất bại !");
+  }
 }
